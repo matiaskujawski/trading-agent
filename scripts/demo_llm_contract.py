@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pandas as pd
 
 from src.backtest.strategy_baseline import moving_average_crossover
+from src.data_pipeline.sentiment import build_sentiment_context
 from src.llm_decision.market_summary import build_market_summary
 from src.llm_decision.mock_decision import mock_decision
 
@@ -23,6 +24,9 @@ if __name__ == "__main__":
     symbol = Path(csv_path).stem
     df = pd.read_csv(csv_path, parse_dates=["timestamp"])
 
+    is_crypto = "forex" not in symbol
+    sentiment = build_sentiment_context() if is_crypto else None
+
     for i in range(51, len(df)):
         window = df.iloc[: i + 1]
         signal = moving_average_crossover(window)
@@ -32,7 +36,7 @@ if __name__ == "__main__":
                 "distance_to_max_drawdown_pct": 1.0,
                 "max_position_size_usd": 25.0,
             }
-            summary = build_market_summary(window, symbol, TRIGGER_REASONS[signal], risk_state)
+            summary = build_market_summary(window, symbol, TRIGGER_REASONS[signal], risk_state, sentiment)
             decision = mock_decision(summary)
 
             print("Primer gatillo encontrado:")
