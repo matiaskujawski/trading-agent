@@ -14,11 +14,26 @@ from src.data_pipeline.forex import fetch_current_price as fetch_forex_price
 
 REFERENCE_PATH = Path(__file__).resolve().parents[2] / "paper_trading" / "shock_reference.json"
 
-# Umbral de movimiento "violento" desde el cierre de referencia. Cripto se
-# mueve normalmente más que forex en un día -- por eso el umbral es distinto
-# por clase de activo, no un único número para todos.
-CRYPTO_SHOCK_PCT = 5.0
-FOREX_SHOCK_PCT = 1.5
+# Umbral de movimiento "violento" desde el cierre de referencia, calculado por
+# activo (no un número único para todos): cada uno tiene su propio percentil
+# 97 de desvío diario máximo respecto al cierre anterior, sobre 8.7 años de
+# historial real (ver scripts/calibrate_shock_thresholds.py). Un solo % para
+# todo cripto dispararía a diario en altcoins volátiles y casi nunca en BTC --
+# el mismo problema que ya corregimos con el stop-loss fijo. Apunta a ~9
+# disparos por año por activo: raro de verdad, no ruido cotidiano.
+SHOCK_THRESHOLDS_PCT = {
+    "BTC/USDT": 11.6,
+    "ETH/USDT": 14.9,
+    "LINK/USDT": 17.5,
+    "UNI/USDT": 19.4,
+    "CAKE/USDT": 20.3,
+    "XRP/USDT": 17.6,
+    "EURUSD": 1.7,
+    "GBPUSD": 1.9,
+    "USDJPY": 2.2,
+    "USDCHF": 1.7,
+    "AUDUSD": 2.2,
+}
 
 
 def save_shock_reference(prices: dict[str, float]) -> None:
@@ -52,7 +67,7 @@ def check_shocks() -> list[dict]:
             continue  # un activo que no se pudo consultar no debe frenar el chequeo de los demás
 
         pct_change = (current - ref_price) / ref_price * 100
-        threshold = CRYPTO_SHOCK_PCT if asset_class == "crypto" else FOREX_SHOCK_PCT
+        threshold = SHOCK_THRESHOLDS_PCT[symbol]
         if abs(pct_change) >= threshold:
             shocks.append(
                 {
