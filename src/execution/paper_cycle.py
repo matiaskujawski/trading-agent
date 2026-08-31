@@ -83,7 +83,8 @@ def run_daily_cycle(decision_fn=mock_decision, dry_run: bool = False) -> dict:
             pnl = proceeds - pos["qty"] * pos["entry_price"]
             cash += proceeds
             risk.register_trade_pnl(pnl, today)
-            log_trade({"day": today, "symbol": symbol, "side": "stop_loss_exit", "price": exec_price, "qty": pos["qty"], "pnl": pnl})
+            if not dry_run:
+                log_trade({"day": today, "symbol": symbol, "side": "stop_loss_exit", "price": exec_price, "qty": pos["qty"], "pnl": pnl})
             events.append(f"STOP-LOSS: se cerró {symbol} con pérdida de ${-pnl:.2f}")
             del positions[symbol]
 
@@ -100,7 +101,8 @@ def run_daily_cycle(decision_fn=mock_decision, dry_run: bool = False) -> dict:
             pnl = proceeds - pos["qty"] * pos["entry_price"]
             cash += proceeds
             risk.register_trade_pnl(pnl, today)
-            log_trade({"day": today, "symbol": symbol, "side": "risk_halt_exit", "price": exec_price, "qty": pos["qty"], "pnl": pnl})
+            if not dry_run:
+                log_trade({"day": today, "symbol": symbol, "side": "risk_halt_exit", "price": exec_price, "qty": pos["qty"], "pnl": pnl})
             events.append(f"FRENO DE RIESGO: drawdown máximo alcanzado, se liquidó todo. {symbol}: ${pnl:.2f}")
             del positions[symbol]
 
@@ -142,7 +144,8 @@ def run_daily_cycle(decision_fn=mock_decision, dry_run: bool = False) -> dict:
                 pnl = proceeds - pos["qty"] * pos["entry_price"]
                 cash += proceeds
                 risk.register_trade_pnl(pnl, today)
-                log_trade({"day": today, "symbol": symbol, "side": "sell", "price": exec_price, "qty": pos["qty"], "pnl": pnl})
+                if not dry_run:
+                    log_trade({"day": today, "symbol": symbol, "side": "sell", "price": exec_price, "qty": pos["qty"], "pnl": pnl})
                 events.append(f"VENTA {symbol}: resultado ${pnl:.2f}")
                 del positions[symbol]
 
@@ -165,7 +168,8 @@ def run_daily_cycle(decision_fn=mock_decision, dry_run: bool = False) -> dict:
                 if qty > 0:
                     positions[symbol] = {"qty": qty, "entry_price": exec_price, "opened_at": today}
                     cash -= cost
-                    log_trade({"day": today, "symbol": symbol, "side": "buy", "price": exec_price, "qty": qty})
+                    if not dry_run:
+                        log_trade({"day": today, "symbol": symbol, "side": "buy", "price": exec_price, "qty": qty})
                     events.append(f"COMPRA {symbol}: {qty:.6f} unidades a ${exec_price:.2f}")
     else:
         events.append(f"Sin operaciones nuevas hoy: {block_reason}")

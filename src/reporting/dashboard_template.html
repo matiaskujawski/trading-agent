@@ -1,0 +1,818 @@
+<title>Bitácora de Trading</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f6f3ec;
+    --surface: #ffffff;
+    --surface-2: #efeadf;
+    --surface-3: #e6e0d2;
+    --border: #ddd6c7;
+    --text: #201d17;
+    --text-muted: #6b6455;
+    --text-faint: #9a927e;
+    --accent: #8c6a2e;
+    --accent-strong: #6e5322;
+    --accent-wash: #8c6a2e14;
+    --gain: #2e7d4f;
+    --gain-wash: #2e7d4f14;
+    --loss: #b23b2e;
+    --loss-wash: #b23b2e14;
+    --warn: #7b4fa6;
+    --warn-wash: #7b4fa614;
+    --shadow: 0 1px 2px rgba(32, 29, 23, 0.06), 0 8px 24px -12px rgba(32, 29, 23, 0.18);
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+    --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #13171a;
+      --surface: #1b2025;
+      --surface-2: #20262b;
+      --surface-3: #272e34;
+      --border: #333b42;
+      --text: #ede9df;
+      --text-muted: #a4a99c;
+      --text-faint: #6f766d;
+      --accent: #d4a94d;
+      --accent-strong: #e8c06a;
+      --accent-wash: #d4a94d1f;
+      --gain: #52b57e;
+      --gain-wash: #52b57e1f;
+      --loss: #e07567;
+      --loss-wash: #e075671f;
+      --warn: #b48ae0;
+      --warn-wash: #b48ae01f;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -14px rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #13171a;
+    --surface: #1b2025;
+    --surface-2: #20262b;
+    --surface-3: #272e34;
+    --border: #333b42;
+    --text: #ede9df;
+    --text-muted: #a4a99c;
+    --text-faint: #6f766d;
+    --accent: #d4a94d;
+    --accent-strong: #e8c06a;
+    --accent-wash: #d4a94d1f;
+    --gain: #52b57e;
+    --gain-wash: #52b57e1f;
+    --loss: #e07567;
+    --loss-wash: #e075671f;
+    --warn: #b48ae0;
+    --warn-wash: #b48ae01f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -14px rgba(0, 0, 0, 0.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  a { color: var(--accent-strong); }
+
+  /* ---------- header ---------- */
+
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.25rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 0.65rem;
+  }
+
+  .brand .mark {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.55rem;
+    letter-spacing: -0.01em;
+  }
+
+  .brand .sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .status-chip .dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--text-faint);
+  }
+
+  .status-chip.live .dot { background: var(--gain); }
+  .status-chip.pending .dot { background: var(--warn); }
+
+  /* ---------- hero ---------- */
+
+  .hero {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  @media (max-width: 720px) {
+    .hero { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+  }
+
+  .hero-equity {
+    padding: 1.75rem 1.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .equity-figure {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2.4rem, 5vw, 3.1rem);
+    letter-spacing: -0.015em;
+    font-variant-numeric: tabular-nums;
+    text-wrap: balance;
+  }
+
+  .equity-delta-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .delta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .delta .label {
+    font-size: 0.72rem;
+    color: var(--text-faint);
+  }
+
+  .delta .value {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pos { color: var(--gain); }
+  .neg { color: var(--loss); }
+  .neu { color: var(--text-muted); }
+
+  .stat-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  .stat-row {
+    background: var(--surface);
+    padding: 0.85rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .stat-row .label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .stat-row .value {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  /* ---------- section titles ---------- */
+
+  .section {
+    margin-top: 2rem;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.25rem;
+    letter-spacing: -0.005em;
+  }
+
+  .section-note {
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+
+  /* ---------- chart ---------- */
+
+  .chart-panel {
+    padding: 1.5rem 1.5rem 1.1rem;
+  }
+
+  .chart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 3rem 1rem 2.4rem;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .chart-empty .glyph {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--text-faint);
+  }
+
+  .chart-empty p { margin: 0; max-width: 34ch; font-size: 0.88rem; }
+
+  svg.curve { width: 100%; height: auto; display: block; }
+  svg.curve .grid-line { stroke: var(--border); stroke-width: 1; }
+  svg.curve .baseline { stroke: var(--text-faint); stroke-width: 1; stroke-dasharray: 2 4; }
+  svg.curve .area { fill: var(--accent-wash); }
+  svg.curve .line { fill: none; stroke: var(--accent); stroke-width: 2.25; stroke-linejoin: round; stroke-linecap: round; }
+  svg.curve .endpoint { fill: var(--accent); }
+  svg.curve .endpoint-ring { fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: 0.45; }
+  svg.curve text.axis-label { font-family: var(--font-mono); font-size: 10px; fill: var(--text-faint); }
+
+  /* ---------- risk strip ---------- */
+
+  .risk-strip {
+    padding: 1.35rem 1.6rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+
+  @media (max-width: 720px) {
+    .risk-strip { grid-template-columns: 1fr; }
+  }
+
+  .gauge { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .gauge-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .gauge-head .label { font-size: 0.8rem; color: var(--text-muted); }
+  .gauge-head .amount { font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+
+  .gauge-track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .gauge-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent);
+    transition: width 0.4s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gauge-fill { transition: none; }
+  }
+
+  .gauge-fill.warn { background: var(--warn); }
+  .gauge-fill.critical { background: var(--loss); }
+
+  /* ---------- table ---------- */
+
+  .table-scroll { overflow-x: auto; }
+
+  table.trades {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+  }
+
+  table.trades th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 0 1rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  table.trades td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  table.trades td.num, table.trades th.num { font-family: var(--font-mono); text-align: right; }
+  table.trades tbody tr:last-child td { border-bottom: none; }
+  table.trades tbody tr:hover { background: var(--surface-2); }
+
+  .side-pill {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .side-pill.buy { background: var(--gain-wash); color: var(--gain); }
+  .side-pill.sell { background: var(--loss-wash); color: var(--loss); }
+  .side-pill.stop_loss_exit, .side-pill.risk_halt_exit { background: var(--warn-wash); color: var(--warn); }
+
+  .empty-state {
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+  }
+
+  .empty-state strong { color: var(--text); font-weight: 500; }
+
+  /* ---------- analyst notes ---------- */
+
+  .notes-list { display: flex; flex-direction: column; gap: 1px; }
+
+  .note-entry {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.1rem 1.3rem;
+    box-shadow: var(--shadow);
+  }
+
+  .note-entry + .note-entry { margin-top: 0.9rem; }
+
+  .note-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .note-date {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+
+  .note-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent-strong);
+  }
+
+  .note-body {
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ---------- universe / footer ---------- */
+
+  .universe-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 0.28rem 0.6rem;
+    border-radius: 7px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  footer.note {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--text-faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <span class="mark">Bitácora de Trading</span>
+      <span class="sub" id="last-updated">--</span>
+    </div>
+    <span class="status-chip" id="status-chip"><span class="dot"></span><span id="status-text">--</span></span>
+  </header>
+
+  <section class="hero">
+    <div class="panel hero-equity">
+      <span class="eyebrow">Capital actual (simulado)</span>
+      <span class="equity-figure" id="equity-figure">--</span>
+      <div class="equity-delta-row">
+        <div class="delta">
+          <span class="label">Hoy</span>
+          <span class="value" id="delta-today">--</span>
+        </div>
+        <div class="delta">
+          <span class="label">Desde el inicio</span>
+          <span class="value" id="delta-total">--</span>
+        </div>
+        <div class="delta">
+          <span class="label">Efectivo disponible</span>
+          <span class="value" id="cash-value">--</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-stack">
+      <div class="stat-row">
+        <span class="label">Capital inicial</span>
+        <span class="value" id="stat-start">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Posiciones abiertas</span>
+        <span class="value" id="stat-positions">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Operaciones registradas</span>
+        <span class="value" id="stat-trades">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Días operados</span>
+        <span class="value" id="stat-days">--</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title">Curva de capital</span>
+      <span class="section-note">Simulación, sin dinero real</span>
+    </div>
+    <div class="panel chart-panel" id="chart-panel"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title">Estado de los frenos de riesgo</span>
+      <span class="section-note">Se recalculan en cada ciclo diario</span>
+    </div>
+    <div class="panel risk-strip" id="risk-strip"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title">Operaciones</span>
+      <span class="section-note" id="trades-note">--</span>
+    </div>
+    <div class="panel table-scroll" id="trades-panel"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title">Lectura del analista</span>
+      <span class="section-note">Un resumen por cada ciclo diario</span>
+    </div>
+    <div class="notes-list" id="notes-list"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title">Universo aprobado</span>
+      <span class="section-note">Definido junto al usuario, no cambia sin acuerdo</span>
+    </div>
+    <div class="panel" style="padding: 1.25rem 1.4rem;">
+      <span class="eyebrow">Cripto</span>
+      <div class="universe-row" id="universe-crypto"></div>
+      <div style="height:1rem"></div>
+      <span class="eyebrow">Forex</span>
+      <div class="universe-row" id="universe-forex"></div>
+    </div>
+  </section>
+
+  <footer class="note">
+    <span>Panel generado y actualizado por Claude a partir del registro real de paper trading.</span>
+    <span id="footer-params">--</span>
+  </footer>
+
+</div>
+
+<script>
+  // ---------------------------------------------------------------
+  // DATA: inyectado por src/reporting/build_dashboard.py a partir del
+  // registro real de paper_trading/ cada vez que corre el ciclo diario.
+  // No editar a mano -- este archivo es una plantilla.
+  // ---------------------------------------------------------------
+  const DATA = /*__DASHBOARD_DATA__*/{
+    meta: {
+      starting_capital: 10000,
+      max_drawdown: 2000,
+      daily_loss_limit: 200,
+      stop_loss_per_trade: 25,
+      universe_crypto: ["BTC/USDT", "ETH/USDT", "LINK/USDT", "UNI/USDT", "CAKE/USDT", "XRP/USDT"],
+      universe_forex: ["EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD"],
+      last_updated: null,
+      is_live: false
+    },
+    equity_daily: [],
+    trades: [],
+    analyst_notes: []
+  };
+
+  const fmtUSD = (n, opts = {}) =>
+    new Intl.NumberFormat("es-AR", { style: "currency", currency: "USD", maximumFractionDigits: opts.decimals ?? 0 }).format(n);
+  const fmtPct = (n) => (n > 0 ? "+" : "") + n.toFixed(2) + "%";
+  const fmtSigned = (n) => (n >= 0 ? "+" : "-") + fmtUSD(Math.abs(n));
+  const cls = (n) => (n > 0 ? "pos" : n < 0 ? "neg" : "neu");
+
+  function render() {
+    const { meta, equity_daily, trades, analyst_notes } = DATA;
+    const hasHistory = equity_daily.length > 0;
+    const current = hasHistory ? equity_daily[equity_daily.length - 1] : null;
+    const equity = current ? current.equity : meta.starting_capital;
+    const cash = current ? current.cash : meta.starting_capital;
+    const prev = equity_daily.length > 1 ? equity_daily[equity_daily.length - 2] : null;
+    const todayDelta = prev ? current.equity - prev.equity : 0;
+    const totalDelta = equity - meta.starting_capital;
+    const totalPct = (totalDelta / meta.starting_capital) * 100;
+
+    document.getElementById("last-updated").textContent = meta.last_updated
+      ? "actualizado " + meta.last_updated
+      : "todavía sin corridas";
+
+    const chip = document.getElementById("status-chip");
+    const statusText = document.getElementById("status-text");
+    if (meta.is_live) {
+      chip.className = "status-chip live";
+      statusText.textContent = "corriendo";
+    } else {
+      chip.className = "status-chip pending";
+      statusText.textContent = "esperando conexión con la API";
+    }
+
+    document.getElementById("equity-figure").textContent = fmtUSD(equity);
+    const deltaTodayEl = document.getElementById("delta-today");
+    deltaTodayEl.textContent = hasHistory && prev ? fmtSigned(todayDelta) : "sin dato todavía";
+    deltaTodayEl.className = "value " + (hasHistory && prev ? cls(todayDelta) : "neu");
+
+    const deltaTotalEl = document.getElementById("delta-total");
+    deltaTotalEl.textContent = hasHistory ? fmtSigned(totalDelta) + "  (" + fmtPct(totalPct) + ")" : "sin dato todavía";
+    deltaTotalEl.className = "value " + (hasHistory ? cls(totalDelta) : "neu");
+
+    document.getElementById("cash-value").textContent = fmtUSD(cash);
+    document.getElementById("stat-start").textContent = fmtUSD(meta.starting_capital);
+    document.getElementById("stat-positions").textContent = current ? current.n_posiciones : 0;
+    document.getElementById("stat-trades").textContent = trades.length;
+    document.getElementById("stat-days").textContent = equity_daily.length;
+    document.getElementById("footer-params").textContent =
+      `Freno diario $${meta.daily_loss_limit} · Drawdown máx $${meta.max_drawdown} · Stop por operación $${meta.stop_loss_per_trade}`;
+
+    renderChart(equity_daily, meta.starting_capital);
+    renderRiskStrip(current, meta);
+    renderTrades(trades);
+    renderNotes(analyst_notes);
+    renderUniverse(meta);
+  }
+
+  function renderChart(points, startingCapital) {
+    const panel = document.getElementById("chart-panel");
+    if (points.length < 2) {
+      panel.innerHTML = `
+        <div class="chart-empty">
+          <span class="glyph">⋯</span>
+          <p>Todavía no hay suficientes días registrados para dibujar la curva. Arranca a llenarse solo, un punto por cada ciclo diario que corra.</p>
+        </div>`;
+      return;
+    }
+
+    const w = 960, h = 260, padL = 46, padR = 16, padT = 18, padB = 26;
+    const values = points.map((p) => p.equity);
+    const min = Math.min(...values, startingCapital);
+    const max = Math.max(...values, startingCapital);
+    const span = max - min || 1;
+    const x = (i) => padL + (i / (points.length - 1)) * (w - padL - padR);
+    const y = (v) => padT + (1 - (v - min) / span) * (h - padT - padB);
+
+    const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${y(p.equity).toFixed(1)}`).join(" ");
+    const areaPath = `${linePath} L ${x(points.length - 1).toFixed(1)} ${(h - padB).toFixed(1)} L ${x(0).toFixed(1)} ${(h - padB).toFixed(1)} Z`;
+    const baseY = y(startingCapital).toFixed(1);
+    const last = points[points.length - 1];
+
+    const gridLines = [0, 0.25, 0.5, 0.75, 1]
+      .map((t) => {
+        const gy = padT + t * (h - padT - padB);
+        const val = max - t * span;
+        return `<line class="grid-line" x1="${padL}" x2="${w - padR}" y1="${gy}" y2="${gy}" />
+                <text class="axis-label" x="4" y="${gy + 3}">${Math.round(val / 1000)}k</text>`;
+      })
+      .join("");
+
+    panel.innerHTML = `
+      <svg class="curve" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        ${gridLines}
+        <line class="baseline" x1="${padL}" x2="${w - padR}" y1="${baseY}" y2="${baseY}" />
+        <path class="area" d="${areaPath}" />
+        <path class="line" d="${linePath}" />
+        <circle class="endpoint-ring" cx="${x(points.length - 1)}" cy="${y(last.equity)}" r="7" />
+        <circle class="endpoint" cx="${x(points.length - 1)}" cy="${y(last.equity)}" r="3.5" />
+      </svg>`;
+  }
+
+  function renderRiskStrip(current, meta) {
+    const strip = document.getElementById("risk-strip");
+    const equity = current ? current.equity : meta.starting_capital;
+    const peak = Math.max(equity, meta.starting_capital);
+    const drawdownUsed = Math.max(0, peak - equity);
+    const drawdownPct = Math.min(1, drawdownUsed / meta.max_drawdown);
+    const dailyLossPct = 0; // se recalcula con datos reales del día en curso
+
+    const gauges = [
+      {
+        label: "Drawdown desde el pico",
+        amount: `${fmtUSD(drawdownUsed)} / ${fmtUSD(meta.max_drawdown)}`,
+        pct: drawdownPct,
+      },
+      {
+        label: "Pérdida del día",
+        amount: `${fmtUSD(0)} / ${fmtUSD(meta.daily_loss_limit)}`,
+        pct: dailyLossPct,
+      },
+      {
+        label: "Estado del sistema",
+        amount: current && current.halted ? "FRENADO" : "operando",
+        pct: current && current.halted ? 1 : 0.04,
+      },
+    ];
+
+    strip.innerHTML = gauges
+      .map((g) => {
+        const level = g.pct >= 0.85 ? "critical" : g.pct >= 0.5 ? "warn" : "";
+        return `
+        <div class="gauge">
+          <div class="gauge-head"><span class="label">${g.label}</span><span class="amount">${g.amount}</span></div>
+          <div class="gauge-track"><div class="gauge-fill ${level}" style="width:${Math.max(3, g.pct * 100)}%"></div></div>
+        </div>`;
+      })
+      .join("");
+  }
+
+  function renderTrades(trades) {
+    const panel = document.getElementById("trades-panel");
+    document.getElementById("trades-note").textContent = trades.length
+      ? `últimas ${Math.min(trades.length, 20)} de ${trades.length}`
+      : "sin operaciones todavía";
+
+    if (!trades.length) {
+      panel.innerHTML = `<div class="empty-state">Todavía no se ejecutó ninguna operación. <strong>Esto es correcto</strong>: el historial arranca recién cuando conectemos la API real de Claude, para no mezclar datos de prueba con el registro real.</div>`;
+      return;
+    }
+
+    const rows = trades
+      .slice(-20)
+      .reverse()
+      .map((t) => {
+        const pnl = t.pnl ?? null;
+        return `<tr>
+          <td>${t.day}</td>
+          <td>${t.symbol}</td>
+          <td><span class="side-pill ${t.side}">${t.side.replace("_", " ")}</span></td>
+          <td class="num">${fmtUSD(t.price, { decimals: 2 })}</td>
+          <td class="num">${t.qty.toFixed(6)}</td>
+          <td class="num ${pnl == null ? "" : cls(pnl)}">${pnl == null ? "—" : fmtSigned(pnl)}</td>
+        </tr>`;
+      })
+      .join("");
+
+    panel.innerHTML = `
+      <table class="trades">
+        <thead><tr>
+          <th>Día</th><th>Activo</th><th>Tipo</th>
+          <th class="num">Precio</th><th class="num">Cantidad</th><th class="num">Resultado</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function renderNotes(notes) {
+    const list = document.getElementById("notes-list");
+    if (!notes.length) {
+      list.innerHTML = `<div class="panel empty-state">Acá va a aparecer, día por día, la lectura del analista sobre cómo rindió el sistema -- no solo los números, también avisos si algo llama la atención.</div>`;
+      return;
+    }
+    list.innerHTML = notes
+      .slice()
+      .reverse()
+      .map(
+        (n) => `
+        <div class="note-entry">
+          <div class="note-head"><span class="note-date">${n.day}</span><span class="note-tag">${n.tag || "Lectura diaria"}</span></div>
+          <div class="note-body">${n.text}</div>
+        </div>`
+      )
+      .join("");
+  }
+
+  function renderUniverse(meta) {
+    document.getElementById("universe-crypto").innerHTML = meta.universe_crypto.map((s) => `<span class="tag">${s}</span>`).join("");
+    document.getElementById("universe-forex").innerHTML = meta.universe_forex.map((s) => `<span class="tag">${s}</span>`).join("");
+  }
+
+  render();
+</script>

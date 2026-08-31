@@ -7,6 +7,7 @@ from pathlib import Path
 
 TRADES_LOG_PATH = Path(__file__).resolve().parents[2] / "paper_trading" / "trades.jsonl"
 EQUITY_LOG_PATH = Path(__file__).resolve().parents[2] / "paper_trading" / "equity_daily.jsonl"
+ANALYST_NOTES_PATH = Path(__file__).resolve().parents[2] / "paper_trading" / "analyst_notes.jsonl"
 
 
 def _append(path: Path, record: dict) -> None:
@@ -20,6 +21,10 @@ def log_trade(record: dict, path: Path = TRADES_LOG_PATH) -> None:
 
 
 def log_daily_equity(record: dict, path: Path = EQUITY_LOG_PATH) -> None:
+    _append(path, record)
+
+
+def log_analyst_note(record: dict, path: Path = ANALYST_NOTES_PATH) -> None:
     _append(path, record)
 
 
