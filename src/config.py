@@ -9,5 +9,5 @@ RISK_PARAMS = {
     "starting_capital": 10_000,
     "max_drawdown": 2_000,
     "daily_loss_limit": 200,
-    "stop_loss_per_trade": None,  # pendiente de confirmación explícita
+    "stop_loss_per_trade": 25,  # confirmado explícitamente por el usuario el 2026-08-30
 }
