@@ -12,7 +12,8 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
-from src.backtest.engine import COST_MODEL, STOP_DISTANCE_PCT, Trade
+from src.backtest.engine import ATR_MULTIPLIER, ATR_PERIOD, COST_MODEL, STOP_DISTANCE_PCT_FALLBACK, Trade
+from src.backtest.indicators import average_true_range
 from src.risk.correlation import passes_correlation_limit
 from src.risk.position_sizing import position_size
 from src.risk.risk_manager import RiskManager
@@ -44,6 +45,7 @@ def run_portfolio_backtest(
     dfs = {symbol: df.set_index("timestamp").sort_index() for symbol, df in asset_dfs.items()}
     returns = {symbol: df["close"].pct_change() for symbol, df in dfs.items()}
     costs = {symbol: COST_MODEL[asset_classes[symbol]] for symbol in dfs}
+    atrs = {symbol: average_true_range(df, period=ATR_PERIOD) for symbol, df in dfs.items()}
 
     all_dates = sorted(set().union(*[set(df.index) for df in dfs.values()]))
 
@@ -142,8 +144,12 @@ def run_portfolio_backtest(
                 fee_bps, slippage_bps = costs[symbol]["fee_bps"], costs[symbol]["slippage_bps"]
                 exec_price = close_price * (1 + slippage_bps / 10_000)
 
+                atr = atrs[symbol].iloc[pos_idx]
+                stop_distance_pct = (
+                    ATR_MULTIPLIER * atr / close_price if pd.notna(atr) and atr > 0 else STOP_DISTANCE_PCT_FALLBACK
+                )
                 if risk.stop_loss_per_trade is not None:
-                    qty = position_size(cash, risk.stop_loss_per_trade, exec_price, STOP_DISTANCE_PCT)
+                    qty = position_size(cash, risk.stop_loss_per_trade, exec_price, stop_distance_pct)
                 else:
                     qty = cash / exec_price
                 cost = qty * exec_price * (1 + fee_bps / 10_000)

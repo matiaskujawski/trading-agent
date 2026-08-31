@@ -15,10 +15,13 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
+from src.backtest.indicators import average_true_range
 from src.risk.position_sizing import position_size
 from src.risk.risk_manager import RiskManager
 
-STOP_DISTANCE_PCT = 0.02  # distancia de stop asumida por la estrategia de referencia (placeholder)
+ATR_PERIOD = 14
+ATR_MULTIPLIER = 2.0  # distancia de stop = ATR_MULTIPLIER x ATR -- estándar de la industria (ej. "Chandelier Exit")
+STOP_DISTANCE_PCT_FALLBACK = 0.02  # solo se usa en los primeros días, antes de que haya ATR calculable
 
 # Costos de ejecución por clase de activo. Forex no tiene comisión explícita en la
 # mayoría de brokers retail (el costo va en el spread), y el spread de los pares
@@ -53,6 +56,7 @@ def run_backtest(df: pd.DataFrame, strategy, risk_params: dict, asset_class: str
     """
     fee_bps = COST_MODEL[asset_class]["fee_bps"]
     slippage_bps = COST_MODEL[asset_class]["slippage_bps"]
+    atr_series = average_true_range(df, period=ATR_PERIOD)
 
     cash = risk_params["starting_capital"]
     position_qty = 0.0
@@ -113,8 +117,12 @@ def run_backtest(df: pd.DataFrame, strategy, risk_params: dict, asset_class: str
 
             if signal == "buy" and position_qty == 0:
                 exec_price = close * (1 + slippage_bps / 10_000)
+                atr = atr_series.iloc[i]
+                stop_distance_pct = (
+                    ATR_MULTIPLIER * atr / close if pd.notna(atr) and atr > 0 else STOP_DISTANCE_PCT_FALLBACK
+                )
                 if risk.stop_loss_per_trade is not None:
-                    qty = position_size(cash, risk.stop_loss_per_trade, exec_price, STOP_DISTANCE_PCT)
+                    qty = position_size(cash, risk.stop_loss_per_trade, exec_price, stop_distance_pct)
                 else:
                     qty = cash / exec_price
                 cost = qty * exec_price * (1 + fee_bps / 10_000)
