@@ -34,6 +34,12 @@ def fetch_ohlcv(
     return df
 
 
+def fetch_current_price(symbol: str, exchange_id: str = "binance") -> float:
+    """Precio en vivo, sin descargar velas -- para el vigía de volatilidad."""
+    exchange = getattr(ccxt, exchange_id)()
+    return exchange.fetch_ticker(symbol)["last"]
+
+
 def save_ohlcv(
     symbol: str,
     timeframe: str = "1d",

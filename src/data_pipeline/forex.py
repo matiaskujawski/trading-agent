@@ -22,6 +22,11 @@ def fetch_forex(
     return df[["timestamp", "open", "high", "low", "close", "volume"]]
 
 
+def fetch_current_price(pair: str) -> float:
+    """Precio en vivo, sin descargar velas -- para el vigía de volatilidad."""
+    return yf.Ticker(f"{pair}=X").fast_info["last_price"]
+
+
 def save_forex(
     pair: str,
     start: str = "2018-01-01",

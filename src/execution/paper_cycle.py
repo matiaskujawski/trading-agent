@@ -17,6 +17,7 @@ from src.data_pipeline.crypto import fetch_ohlcv
 from src.data_pipeline.forex import fetch_forex
 from src.data_pipeline.sentiment import build_sentiment_context
 from src.execution.paper_state import load_state, save_state
+from src.execution.shock_watchdog import save_shock_reference
 from src.execution.trade_log import log_daily_equity, log_trade
 from src.llm_decision.claude_decision import claude_decision
 from src.llm_decision.market_summary import build_market_summary
@@ -191,5 +192,6 @@ def run_daily_cycle(decision_fn=claude_decision, dry_run: bool = False) -> dict:
     if not dry_run:
         save_state(state)
         log_daily_equity({"day": today, "equity": equity, "cash": cash, "n_posiciones": len(positions), "halted": risk.halted})
+        save_shock_reference({symbol: df["close"].iloc[-1] for symbol, df in dfs.items()})
 
     return {"day": today, "equity": equity, "state": state, "events": events, "sentiment_context": sentiment_context}
