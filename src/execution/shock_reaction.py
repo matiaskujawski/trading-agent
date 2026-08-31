@@ -25,6 +25,12 @@ from src.risk.risk_manager import RiskManager
 
 LOOKBACK_DAYS = 150
 
+# Durante un shock, los rellenos reales suelen ser peores que en mercado
+# tranquilo (ver el caso XRP: gap risk, poca liquidez momentánea). Usar el
+# mismo slippage "de todos los días" acá sería optimista justo en el peor
+# momento para serlo -- se multiplica, no se ignora.
+SHOCK_SLIPPAGE_MULTIPLIER = 3.0
+
 
 def _recent_window_with_live_price(symbol: str, asset_class: str, current_price: float) -> pd.DataFrame:
     """Historial real reciente (para que las medias móviles y la volatilidad
@@ -77,12 +83,14 @@ def react_to_shock(shock: dict, dry_run: bool = False) -> dict:
         unrealized_pnl = (current_price - pos["entry_price"]) * pos["qty"]
         if unrealized_pnl <= -risk.stop_loss_per_trade:
             fee_bps = COST_MODEL[asset_class]["fee_bps"]
-            proceeds = pos["qty"] * current_price * (1 - fee_bps / 10_000)
+            slippage_bps = COST_MODEL[asset_class]["slippage_bps"] * SHOCK_SLIPPAGE_MULTIPLIER
+            exec_price = current_price * (1 - slippage_bps / 10_000)
+            proceeds = pos["qty"] * exec_price * (1 - fee_bps / 10_000)
             pnl = proceeds - pos["qty"] * pos["entry_price"]
             cash += proceeds
             risk.register_trade_pnl(pnl, today)
             if not dry_run:
-                log_trade({"day": today, "symbol": symbol, "side": "stop_loss_exit_reactivo", "price": current_price, "qty": pos["qty"], "pnl": pnl})
+                log_trade({"day": today, "symbol": symbol, "side": "stop_loss_exit_reactivo", "price": exec_price, "qty": pos["qty"], "pnl": pnl})
             events.append(f"STOP-LOSS REACTIVO: se cerró {symbol} con pérdida de ${-pnl:.2f}")
             del positions[symbol]
 
@@ -93,14 +101,17 @@ def react_to_shock(shock: dict, dry_run: bool = False) -> dict:
     if risk.check_drawdown_breach(mark_to_market()):
         for s in list(positions.keys()):
             pos = positions[s]
-            price = current_price if s == symbol else pos.get("last_known_price", pos["entry_price"])
-            fee_bps = COST_MODEL[asset_class if s == symbol else "crypto"]["fee_bps"]
-            proceeds = pos["qty"] * price * (1 - fee_bps / 10_000)
+            s_class = asset_class if s == symbol else _asset_class_of(s)
+            mark_price = current_price if s == symbol else pos.get("last_known_price", pos["entry_price"])
+            fee_bps = COST_MODEL[s_class]["fee_bps"]
+            slippage_bps = COST_MODEL[s_class]["slippage_bps"] * SHOCK_SLIPPAGE_MULTIPLIER
+            exec_price = mark_price * (1 - slippage_bps / 10_000)
+            proceeds = pos["qty"] * exec_price * (1 - fee_bps / 10_000)
             pnl = proceeds - pos["qty"] * pos["entry_price"]
             cash += proceeds
             risk.register_trade_pnl(pnl, today)
             if not dry_run:
-                log_trade({"day": today, "symbol": s, "side": "risk_halt_exit_reactivo", "price": price, "qty": pos["qty"], "pnl": pnl})
+                log_trade({"day": today, "symbol": s, "side": "risk_halt_exit_reactivo", "price": exec_price, "qty": pos["qty"], "pnl": pnl})
             events.append(f"FRENO DE RIESGO REACTIVO: drawdown máximo alcanzado, se liquidó todo. {s}: ${pnl:.2f}")
             del positions[s]
 
@@ -122,7 +133,8 @@ def react_to_shock(shock: dict, dry_run: bool = False) -> dict:
         decision = claude_decision(summary)
         events.append(f"LECTURA DEL LLM sobre el shock: {decision['action']} (confianza {decision['confidence']}) -- {decision['reasoning']}")
 
-        fee_bps, slippage_bps = COST_MODEL[asset_class]["fee_bps"], COST_MODEL[asset_class]["slippage_bps"]
+        fee_bps = COST_MODEL[asset_class]["fee_bps"]
+        slippage_bps = COST_MODEL[asset_class]["slippage_bps"] * SHOCK_SLIPPAGE_MULTIPLIER
 
         if decision["action"] == "sell" and symbol in positions:
             pos = positions[symbol]
