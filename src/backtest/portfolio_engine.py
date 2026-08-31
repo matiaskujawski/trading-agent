@@ -18,7 +18,11 @@ from src.risk.position_sizing import position_size
 from src.risk.risk_manager import RiskManager
 
 CORRELATION_WINDOW = 60
-CORRELATION_THRESHOLD = 0.7
+# 0.5 en vez del "0.7 libro de texto": con datos reales (BTC/ETH/LINK/UNI/CAKE/XRP/EURUSD),
+# el comportamiento es estable entre 0.3 y 0.6, pero salta brusco justo en 0.7 -- ahí se
+# agrupan muchos pares cripto reales, así que ese umbral deja pasar de golpe demasiada
+# correlación oculta. Ver commit de esta decisión para el detalle de la comparación.
+CORRELATION_THRESHOLD = 0.5
 STRATEGY_LOOKBACK = 100  # ventana acotada que se le pasa a la estrategia (más que suficiente para MA 20/50)
 
 
