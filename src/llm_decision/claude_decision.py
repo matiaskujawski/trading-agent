@@ -3,10 +3,12 @@ una vez que paper trading está listo para conectarse de verdad. La respuesta
 nunca se usa "cruda": siempre pasa por decision_schema.validate_decision()."""
 
 import json
+from datetime import date
 
 import anthropic
 from dotenv import load_dotenv
 
+from src.execution.api_usage import budget_exceeded, log_api_call
 from src.llm_decision.decision_schema import validate_decision
 from src.llm_decision.prompt_template import SYSTEM_PROMPT
 
@@ -25,6 +27,16 @@ def _get_client() -> anthropic.Anthropic:
 
 
 def claude_decision(market_summary: dict) -> dict:
+    if budget_exceeded():
+        return validate_decision(
+            {
+                "action": "hold",
+                "confidence": 0.0,
+                "suggested_size_fraction": 0.0,
+                "reasoning": "freno de gasto mensual de API alcanzado -- no se consulta al LLM este ciclo",
+            }
+        )
+
     client = _get_client()
     response = client.messages.create(
         model=MODEL,
@@ -34,6 +46,7 @@ def claude_decision(market_summary: dict) -> dict:
         messages=[{"role": "user", "content": json.dumps(market_summary, ensure_ascii=False)}],
     )
     text = next((b.text for b in response.content if b.type == "text"), "")
+    log_api_call(date.today().isoformat(), market_summary.get("symbol", "?"), response.usage.input_tokens, response.usage.output_tokens)
 
     try:
         raw = json.loads(text)

@@ -538,6 +538,10 @@
         <span class="label">Días operados</span>
         <span class="value" id="stat-days">--</span>
       </div>
+      <div class="stat-row">
+        <span class="label">Gasto de API este mes</span>
+        <span class="value" id="stat-api-spend">--</span>
+      </div>
     </div>
   </section>
 
@@ -609,7 +613,9 @@
       universe_crypto: ["BTC/USDT", "ETH/USDT", "LINK/USDT", "UNI/USDT", "CAKE/USDT", "XRP/USDT"],
       universe_forex: ["EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD"],
       last_updated: null,
-      is_live: false
+      is_live: false,
+      api_spend_month_usd: 0,
+      api_budget_month_usd: 2
     },
     equity_daily: [],
     trades: [],
@@ -661,6 +667,8 @@
     document.getElementById("stat-positions").textContent = current ? current.n_posiciones : 0;
     document.getElementById("stat-trades").textContent = trades.length;
     document.getElementById("stat-days").textContent = equity_daily.length;
+    document.getElementById("stat-api-spend").textContent =
+      fmtUSD(meta.api_spend_month_usd, { decimals: 4 }) + " / " + fmtUSD(meta.api_budget_month_usd);
     document.getElementById("footer-params").textContent =
       `Freno diario $${meta.daily_loss_limit} · Drawdown máx $${meta.max_drawdown} · Stop por operación $${meta.stop_loss_per_trade}`;
 

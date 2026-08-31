@@ -4,6 +4,7 @@ necesita para renderizarse, leyendo el registro real de paper_trading/."""
 from datetime import datetime, timezone
 
 from src.config import CRYPTO_SYMBOLS, FOREX_PAIRS, RISK_PARAMS
+from src.execution.api_usage import MONTHLY_BUDGET_USD, monthly_spend
 from src.execution.trade_log import ANALYST_NOTES_PATH, EQUITY_LOG_PATH, TRADES_LOG_PATH, read_jsonl
 
 
@@ -22,6 +23,8 @@ def build_dashboard_data() -> dict:
             "universe_forex": FOREX_PAIRS,
             "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
             "is_live": len(equity_daily) > 0,
+            "api_spend_month_usd": round(monthly_spend(), 4),
+            "api_budget_month_usd": MONTHLY_BUDGET_USD,
         },
         "equity_daily": equity_daily,
         "trades": trades,
