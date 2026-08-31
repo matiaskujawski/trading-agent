@@ -18,8 +18,8 @@ from src.data_pipeline.forex import fetch_forex
 from src.data_pipeline.sentiment import build_sentiment_context
 from src.execution.paper_state import load_state, save_state
 from src.execution.trade_log import log_daily_equity, log_trade
+from src.llm_decision.claude_decision import claude_decision
 from src.llm_decision.market_summary import build_market_summary
-from src.llm_decision.mock_decision import mock_decision
 from src.risk.correlation import passes_correlation_limit
 from src.risk.position_sizing import position_size
 from src.risk.risk_manager import RiskManager
@@ -36,7 +36,7 @@ def _fetch_recent(symbol: str, asset_class: str) -> pd.DataFrame:
     return fetch_forex(symbol, start=since)
 
 
-def run_daily_cycle(decision_fn=mock_decision, dry_run: bool = False) -> dict:
+def run_daily_cycle(decision_fn=claude_decision, dry_run: bool = False) -> dict:
     """Devuelve un resumen del ciclo (usado por el reporte diario). Con
     dry_run=True no guarda estado ni log -- para probar sin ensuciar el
     historial real."""
