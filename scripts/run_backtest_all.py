@@ -20,8 +20,9 @@ if __name__ == "__main__":
     rows = []
     for csv_path in sorted(RAW_DIR.glob("*.csv")):
         try:
+            asset_class = "forex" if csv_path.stem.startswith("forex_") else "crypto"
             df = pd.read_csv(csv_path, parse_dates=["timestamp"])
-            result = run_backtest(df, moving_average_crossover, RISK_PARAMS)
+            result = run_backtest(df, moving_average_crossover, RISK_PARAMS, asset_class=asset_class)
             stats = summarize(result.equity_curve["equity"], result.trades)
             halted = bool(result.equity_curve["halted"].any())
             rows.append({"activo": csv_path.stem, "halted": halted, **stats})

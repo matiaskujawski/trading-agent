@@ -19,8 +19,8 @@ from src.config import RISK_PARAMS
 RAW_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
 
 
-def run_and_summarize(df):
-    result = run_backtest(df, moving_average_crossover, RISK_PARAMS)
+def run_and_summarize(df, asset_class):
+    result = run_backtest(df, moving_average_crossover, RISK_PARAMS, asset_class=asset_class)
     stats = summarize(result.equity_curve["equity"], result.trades)
     stats["halted"] = bool(result.equity_curve["halted"].any())
     return stats
@@ -30,11 +30,12 @@ if __name__ == "__main__":
     rows = []
     for csv_path in sorted(RAW_DIR.glob("*.csv")):
         try:
+            asset_class = "forex" if csv_path.stem.startswith("forex_") else "crypto"
             df = pd.read_csv(csv_path, parse_dates=["timestamp"])
             df_in, df_out = split_in_out_sample(df, out_sample_frac=0.3)
 
-            in_stats = run_and_summarize(df_in)
-            out_stats = run_and_summarize(df_out)
+            in_stats = run_and_summarize(df_in, asset_class)
+            out_stats = run_and_summarize(df_out, asset_class)
 
             rows.append(
                 {

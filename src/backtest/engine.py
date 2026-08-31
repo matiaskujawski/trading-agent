@@ -5,9 +5,10 @@ el máximo y mínimo de cada vela (no solo el cierre), para aproximar mejor qué
 pasado intradía. Aun así, con datos diarios queda un margen de imprecisión frente a
 datos tick a tick -- se documenta explícitamente, no se oculta.
 
-Simplificación intencional de esta primera versión: una sola posición a la vez,
-tamaño de posición fijo (todo el capital disponible). El tamaño de posición
-variable lo va a proponer el LLM en la etapa 4 del plan.
+Simplificación intencional de esta primera versión: una sola posición a la vez.
+El tamaño de posición se calcula por riesgo (ver src/risk/position_sizing.py);
+la distancia de stop que usa ese cálculo todavía es un valor fijo (STOP_DISTANCE_PCT)
+-- se espera que la etapa 4 (LLM) o una mejora basada en volatilidad lo reemplacen.
 """
 
 from dataclasses import dataclass, field
@@ -17,9 +18,16 @@ import pandas as pd
 from src.risk.position_sizing import position_size
 from src.risk.risk_manager import RiskManager
 
-FEE_BPS = 10  # 0.10% por operación (comisión taker típica en Binance)
-SLIPPAGE_BPS = 5  # 0.05% de deslizamiento asumido entre precio de decisión y precio de ejecución
 STOP_DISTANCE_PCT = 0.02  # distancia de stop asumida por la estrategia de referencia (placeholder)
+
+# Costos de ejecución por clase de activo. Forex no tiene comisión explícita en la
+# mayoría de brokers retail (el costo va en el spread), y el spread de los pares
+# mayores es mucho más chico que el fee+slippage típico de un exchange cripto.
+# Son aproximaciones -- se recalibran con datos reales del bróker/exchange elegido.
+COST_MODEL = {
+    "crypto": {"fee_bps": 10, "slippage_bps": 5},
+    "forex": {"fee_bps": 0, "slippage_bps": 2},
+}
 
 
 @dataclass
@@ -37,11 +45,15 @@ class BacktestResult:
     trades: list = field(default_factory=list)
 
 
-def run_backtest(df: pd.DataFrame, strategy, risk_params: dict) -> BacktestResult:
+def run_backtest(df: pd.DataFrame, strategy, risk_params: dict, asset_class: str = "crypto") -> BacktestResult:
     """
     df: columnas timestamp, open, high, low, close, volume, ordenado cronológicamente.
     strategy: función (df_hasta_hoy) -> "buy" | "sell" | "hold".
+    asset_class: "crypto" | "forex", determina el modelo de costos (ver COST_MODEL).
     """
+    fee_bps = COST_MODEL[asset_class]["fee_bps"]
+    slippage_bps = COST_MODEL[asset_class]["slippage_bps"]
+
     cash = risk_params["starting_capital"]
     position_qty = 0.0
     entry_price = None
@@ -71,8 +83,8 @@ def run_backtest(df: pd.DataFrame, strategy, risk_params: dict) -> BacktestResul
             worst_case_pnl = (low - entry_price) * position_qty
             if worst_case_pnl <= -risk.stop_loss_per_trade:
                 trigger_price = entry_price - risk.stop_loss_per_trade / position_qty
-                exec_price = trigger_price * (1 - SLIPPAGE_BPS / 10_000)
-                proceeds = position_qty * exec_price * (1 - FEE_BPS / 10_000)
+                exec_price = trigger_price * (1 - slippage_bps / 10_000)
+                proceeds = position_qty * exec_price * (1 - fee_bps / 10_000)
                 pnl = proceeds - position_qty * entry_price
                 cash += proceeds
                 trades.append(Trade(day, "stop_loss_exit", exec_price, position_qty, pnl))
@@ -84,8 +96,8 @@ def run_backtest(df: pd.DataFrame, strategy, risk_params: dict) -> BacktestResul
         worst_case_equity = cash + position_qty * low if position_qty > 0 else cash
         breached = risk.check_drawdown_breach(worst_case_equity)
         if breached and position_qty > 0:
-            exec_price = low * (1 - SLIPPAGE_BPS / 10_000)
-            proceeds = position_qty * exec_price * (1 - FEE_BPS / 10_000)
+            exec_price = low * (1 - slippage_bps / 10_000)
+            proceeds = position_qty * exec_price * (1 - fee_bps / 10_000)
             pnl = proceeds - position_qty * entry_price
             cash += proceeds
             trades.append(Trade(day, "risk_halt_exit", exec_price, position_qty, pnl))
@@ -100,14 +112,14 @@ def run_backtest(df: pd.DataFrame, strategy, risk_params: dict) -> BacktestResul
             signal = strategy(df.iloc[: i + 1])
 
             if signal == "buy" and position_qty == 0:
-                exec_price = close * (1 + SLIPPAGE_BPS / 10_000)
+                exec_price = close * (1 + slippage_bps / 10_000)
                 if risk.stop_loss_per_trade is not None:
                     qty = position_size(cash, risk.stop_loss_per_trade, exec_price, STOP_DISTANCE_PCT)
                 else:
                     qty = cash / exec_price
-                cost = qty * exec_price * (1 + FEE_BPS / 10_000)
+                cost = qty * exec_price * (1 + fee_bps / 10_000)
                 if cost > cash:
-                    qty = cash / (exec_price * (1 + FEE_BPS / 10_000))
+                    qty = cash / (exec_price * (1 + fee_bps / 10_000))
                     cost = cash
                 position_qty = qty
                 entry_price = exec_price
@@ -115,8 +127,8 @@ def run_backtest(df: pd.DataFrame, strategy, risk_params: dict) -> BacktestResul
                 trades.append(Trade(day, "buy", exec_price, qty))
 
             elif signal == "sell" and position_qty > 0:
-                exec_price = close * (1 - SLIPPAGE_BPS / 10_000)
-                proceeds = position_qty * exec_price * (1 - FEE_BPS / 10_000)
+                exec_price = close * (1 - slippage_bps / 10_000)
+                proceeds = position_qty * exec_price * (1 - fee_bps / 10_000)
                 pnl = proceeds - position_qty * entry_price
                 cash += proceeds
                 trades.append(Trade(day, "sell", exec_price, position_qty, pnl))
