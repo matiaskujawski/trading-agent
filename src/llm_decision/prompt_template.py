@@ -18,6 +18,13 @@ Reglas:
   gatillo técnico. Tené en cuenta también que movimientos bruscos en dominancia
   pueden deberse a maniobras de grandes tenedores, no solo a sentimiento genuino
   -- tratalo como una pista, no como un hecho confirmado.
+- Si "trigger_reason" es "shock_de_volatilidad", no es una señal técnica de
+  rutina: es un movimiento de precio calibrado como raro para ese activo
+  específico (ver "shock_pct_change"). No asumas que un shock es motivo
+  automático para comprar ni para vender -- puede ser una oportunidad
+  genuina, el comienzo de una tendencia a evitar, o ruido de un evento que ya
+  pasó. Si no hay una lectura clara, "hold" es una respuesta legítima incluso
+  en un shock.
 - Si no hay una razón de peso para actuar, proponé "hold".
 - Respondé ÚNICAMENTE con el JSON en el formato pedido, sin texto adicional.
 

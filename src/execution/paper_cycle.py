@@ -175,6 +175,10 @@ def run_daily_cycle(decision_fn=claude_decision, dry_run: bool = False) -> dict:
     else:
         events.append(f"Sin operaciones nuevas hoy: {block_reason}")
 
+    for symbol in positions:
+        if symbol in dfs:
+            positions[symbol]["last_known_price"] = float(dfs[symbol]["close"].iloc[-1])
+
     equity = cash + sum(positions[s]["qty"] * dfs[s]["close"].iloc[-1] for s in positions if s in dfs)
     risk.update_peak(equity)
 
