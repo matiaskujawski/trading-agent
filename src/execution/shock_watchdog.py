@@ -6,6 +6,7 @@ una consulta al LLM y un aviso al usuario. La inmensa mayoría de las veces
 que corre, no encuentra nada y no gasta un token."""
 
 import json
+from datetime import date
 from pathlib import Path
 
 from src.config import CRYPTO_SYMBOLS, FOREX_PAIRS
@@ -37,10 +38,20 @@ SHOCK_THRESHOLDS_PCT = {
 
 
 def save_shock_reference(prices: dict[str, float]) -> None:
-    """Se llama una vez por día, al final del ciclo diario, con el cierre de
-    cada activo -- es contra lo que se compara el resto del día."""
+    """Se llama al final de cada corrida del ciclo, pero la referencia real
+    solo se actualiza una vez por día calendario (la primera corrida del
+    día) -- si el ciclo corre varias veces por día para reaccionar más
+    rápido a las señales técnicas, eso NO debe correr también la vara de qué
+    cuenta como "shock": tiene que seguir siendo relativo al cierre real del
+    día, no a "hace un rato"."""
+    today = date.today().isoformat()
+    existing = load_shock_reference()
+    if existing.get("_date") == today:
+        return
+    payload = dict(prices)
+    payload["_date"] = today
     REFERENCE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REFERENCE_PATH.write_text(json.dumps(prices, indent=2, ensure_ascii=False), encoding="utf-8")
+    REFERENCE_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 def load_shock_reference() -> dict[str, float]:
