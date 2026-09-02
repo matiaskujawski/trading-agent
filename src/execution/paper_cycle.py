@@ -1,8 +1,9 @@
-"""Ciclo diario de paper trading: busca precios frescos, revisa los frenos de
+"""Ciclo de trading (corre cada 2 horas, no solo una vez por día -- el nombre
+quedó de cuando era diario): busca precios frescos, revisa los frenos de
 riesgo (stop-loss y drawdown máximo) contra el mercado actual, evalúa gatillos
 técnicos y consulta al LLM (o al mock) SOLO cuando hay un gatillo, aplica el
 límite de correlación, y simula la ejecución. No usa plata real -- todo el
-estado vive en paper_trading/, fuera de git."""
+estado vive en paper_trading/, versionado en git."""
 
 from datetime import date, timedelta
 

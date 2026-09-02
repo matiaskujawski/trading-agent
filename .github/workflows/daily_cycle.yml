@@ -1,8 +1,8 @@
-name: Ciclo diario de paper trading
+name: Ciclo de señales técnicas
 
 "on":
   schedule:
-    - cron: "0 11 * * *"  # 08:00 hora Argentina (UTC-3)
+    - cron: "10 */2 * * *"  # cada 2 horas (offset 10min del vigía de shocks, para no pisarse en el push)
   workflow_dispatch: {}
 
 permissions:
@@ -29,5 +29,5 @@ jobs:
           git config user.name "trading-agent-bot"
           git config user.email "actions@users.noreply.github.com"
           git add paper_trading/
-          git diff --staged --quiet || git commit -m "Ciclo diario: $(date -u +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "Ciclo de señales: $(date -u +%Y-%m-%dT%H:%M)"
           git push
