@@ -1,6 +1,6 @@
 name: Ciclo diario de paper trading
 
-on:
+"on":
   schedule:
     - cron: "0 11 * * *"  # 08:00 hora Argentina (UTC-3)
   workflow_dispatch: {}
