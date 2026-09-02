@@ -8,6 +8,7 @@ from pathlib import Path
 TRADES_LOG_PATH = Path(__file__).resolve().parents[2] / "paper_trading" / "trades.jsonl"
 EQUITY_LOG_PATH = Path(__file__).resolve().parents[2] / "paper_trading" / "equity_daily.jsonl"
 ANALYST_NOTES_PATH = Path(__file__).resolve().parents[2] / "paper_trading" / "analyst_notes.jsonl"
+SHOCK_EVENTS_PATH = Path(__file__).resolve().parents[2] / "paper_trading" / "shock_events.jsonl"
 
 
 def append_jsonl(path: Path, record: dict) -> None:
@@ -34,6 +35,13 @@ def log_daily_equity(record: dict, path: Path = EQUITY_LOG_PATH) -> None:
 
 
 def log_analyst_note(record: dict, path: Path = ANALYST_NOTES_PATH) -> None:
+    append_jsonl(path, record)
+
+
+def log_shock_event(record: dict, path: Path = SHOCK_EVENTS_PATH) -> None:
+    """Un shock real detectado en vivo (nunca uno simulado para pruebas) --
+    es uno de los hitos que definimos para evaluar si ya vale la pena hablar
+    de plata real: ver un shock de verdad manejado, no solo uno fabricado."""
     append_jsonl(path, record)
 
 
