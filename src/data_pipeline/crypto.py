@@ -9,13 +9,27 @@ import pandas as pd
 RAW_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
 
 
+def _make_exchange(exchange_id: str):
+    """api.binance.com devuelve 451 ("restricted location") desde los runners de
+    GitHub Actions -- confirmado en producción (ver Actions run del 2026-09-02
+    01:51 UTC), lo que dejó todo el universo cripto sin datos desde el primer
+    ciclo real. data-api.binance.vision es el espejo público de solo-datos-de-
+    mercado que Binance documenta para este caso exacto (klines/ticker/
+    exchangeInfo, sin cuenta ni auth) y no aplica la misma restricción
+    geográfica. Solo afecta los endpoints públicos que usamos acá."""
+    exchange = getattr(ccxt, exchange_id)()
+    if exchange_id == "binance":
+        exchange.urls["api"]["public"] = "https://data-api.binance.vision/api/v3"
+    return exchange
+
+
 def fetch_ohlcv(
     symbol: str,
     timeframe: str = "1d",
     exchange_id: str = "binance",
     since: str = "2018-01-01",
 ) -> pd.DataFrame:
-    exchange = getattr(ccxt, exchange_id)()
+    exchange = _make_exchange(exchange_id)
     since_ms = exchange.parse8601(f"{since}T00:00:00Z")
     all_candles = []
 
@@ -36,7 +50,7 @@ def fetch_ohlcv(
 
 def fetch_current_price(symbol: str, exchange_id: str = "binance") -> float:
     """Precio en vivo, sin descargar velas -- para el vigía de volatilidad."""
-    exchange = getattr(ccxt, exchange_id)()
+    exchange = _make_exchange(exchange_id)
     return exchange.fetch_ticker(symbol)["last"]
 
 
