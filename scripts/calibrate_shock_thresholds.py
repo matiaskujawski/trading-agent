@@ -26,6 +26,12 @@ SYMBOL_BY_FILENAME = {
     "forex_USDJPY_1d": "USDJPY",
     "forex_USDCHF_1d": "USDCHF",
     "forex_AUDUSD_1d": "AUDUSD",
+    "binance_SOL-USDT_1d": "SOL/USDT",
+    "binance_ADA-USDT_1d": "ADA/USDT",
+    "binance_DOT-USDT_1d": "DOT/USDT",
+    "binance_AVAX-USDT_1d": "AVAX/USDT",
+    "binance_LTC-USDT_1d": "LTC/USDT",
+    "forex_USDCAD_1d": "USDCAD",
 }
 
 if __name__ == "__main__":

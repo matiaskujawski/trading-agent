@@ -29,11 +29,17 @@ SHOCK_THRESHOLDS_PCT = {
     "UNI/USDT": 19.4,
     "CAKE/USDT": 20.3,
     "XRP/USDT": 17.6,
+    "SOL/USDT": 20.2,
+    "ADA/USDT": 17.0,
+    "DOT/USDT": 17.6,
+    "AVAX/USDT": 19.0,
+    "LTC/USDT": 16.1,
     "EURUSD": 1.7,
     "GBPUSD": 1.9,
     "USDJPY": 2.2,
     "USDCHF": 1.7,
     "AUDUSD": 2.2,
+    "USDCAD": 1.5,
 }
 
 
