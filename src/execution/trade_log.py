@@ -21,7 +21,16 @@ def log_trade(record: dict, path: Path = TRADES_LOG_PATH) -> None:
 
 
 def log_daily_equity(record: dict, path: Path = EQUITY_LOG_PATH) -> None:
-    append_jsonl(path, record)
+    """A diferencia de log_trade, acá sí puede haber más de una corrida por
+    día real (ej: una corrida manual el mismo día que ya corrió el ciclo
+    automático) -- si ya hay una fila para ese "day", se reemplaza en vez de
+    agregar una duplicada."""
+    existing = read_jsonl(path)
+    if existing and existing[-1].get("day") == record.get("day"):
+        existing[-1] = record
+        path.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in existing) + "\n", encoding="utf-8")
+    else:
+        append_jsonl(path, record)
 
 
 def log_analyst_note(record: dict, path: Path = ANALYST_NOTES_PATH) -> None:
