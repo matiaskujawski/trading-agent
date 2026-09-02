@@ -768,7 +768,7 @@
       : "sin operaciones todavía";
 
     if (!trades.length) {
-      panel.innerHTML = `<div class="empty-state">Todavía no se ejecutó ninguna operación. <strong>Esto es correcto</strong>: el historial arranca recién cuando conectemos la API real de Claude, para no mezclar datos de prueba con el registro real.</div>`;
+      panel.innerHTML = `<div class="empty-state">Todavía no se ejecutó ninguna operación. <strong>Esto es esperado</strong>: el sistema es reactivo a gatillos, no proactivo -- solo consulta al LLM (ya conectado a la API real de Claude) cuando algún activo del universo aprobado tiene un cruce de medias móviles. Todavía no ocurrió ninguno.</div>`;
       return;
     }
 
