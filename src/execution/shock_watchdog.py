@@ -12,6 +12,7 @@ from pathlib import Path
 from src.config import CRYPTO_SYMBOLS, FOREX_PAIRS
 from src.data_pipeline.crypto import fetch_current_price as fetch_crypto_price
 from src.data_pipeline.forex import fetch_current_price as fetch_forex_price
+from src.execution.fetch_health import record_fetch_results
 
 REFERENCE_PATH = Path(__file__).resolve().parents[2] / "paper_trading" / "shock_reference.json"
 
@@ -74,13 +75,16 @@ def check_shocks() -> list[dict]:
     assets = {s: "crypto" for s in CRYPTO_SYMBOLS} | {s: "forex" for s in FOREX_PAIRS}
 
     shocks = []
+    fetch_results = {}
     for symbol, asset_class in assets.items():
         ref_price = reference.get(symbol)
         if ref_price is None:
             continue
         try:
             current = fetch_crypto_price(symbol) if asset_class == "crypto" else fetch_forex_price(symbol)
-        except Exception:
+            fetch_results[symbol] = None
+        except Exception as e:
+            fetch_results[symbol] = str(e)
             continue  # un activo que no se pudo consultar no debe frenar el chequeo de los demás
 
         pct_change = (current - ref_price) / ref_price * 100
@@ -97,4 +101,5 @@ def check_shocks() -> list[dict]:
                 }
             )
 
+    record_fetch_results(fetch_results)
     return shocks

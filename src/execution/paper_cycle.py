@@ -17,6 +17,7 @@ from src.config import CRYPTO_SYMBOLS, FOREX_PAIRS, RISK_PARAMS
 from src.data_pipeline.crypto import fetch_ohlcv
 from src.data_pipeline.forex import fetch_forex
 from src.data_pipeline.sentiment import build_sentiment_context
+from src.execution.fetch_health import record_fetch_results
 from src.execution.paper_state import load_state, save_state
 from src.execution.shock_watchdog import save_shock_reference
 from src.execution.trade_log import log_daily_equity, log_trade
@@ -61,12 +62,14 @@ def run_daily_cycle(decision_fn=claude_decision, dry_run: bool = False) -> dict:
     positions = state["positions"]
 
     assets = {s: "crypto" for s in CRYPTO_SYMBOLS} | {s: "forex" for s in FOREX_PAIRS}
-    dfs, fetch_errors = {}, []
+    dfs, fetch_errors, fetch_results = {}, [], {}
     for symbol, asset_class in assets.items():
         try:
             dfs[symbol] = _fetch_recent(symbol, asset_class)
+            fetch_results[symbol] = None
         except Exception as e:
             fetch_errors.append(f"{symbol}: {e}")
+            fetch_results[symbol] = str(e)
 
     sentiment_context = build_sentiment_context()
     events = list(fetch_errors)
@@ -198,5 +201,6 @@ def run_daily_cycle(decision_fn=claude_decision, dry_run: bool = False) -> dict:
         save_state(state)
         log_daily_equity({"day": today, "equity": equity, "cash": cash, "n_posiciones": len(positions), "halted": risk.halted})
         save_shock_reference({symbol: df["close"].iloc[-1] for symbol, df in dfs.items()})
+        record_fetch_results(fetch_results)
 
     return {"day": today, "equity": equity, "state": state, "events": events, "sentiment_context": sentiment_context}
