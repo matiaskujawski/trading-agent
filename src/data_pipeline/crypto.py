@@ -16,10 +16,17 @@ def _make_exchange(exchange_id: str):
     ciclo real. data-api.binance.vision es el espejo público de solo-datos-de-
     mercado que Binance documenta para este caso exacto (klines/ticker/
     exchangeInfo, sin cuenta ni auth) y no aplica la misma restricción
-    geográfica. Solo afecta los endpoints públicos que usamos acá."""
+    geográfica.
+
+    No alcanza con redirigir el endpoint spot: por default ccxt también carga
+    mercados de futuros (fapi/dapi) al hacer load_markets(), y esos sí siguen
+    bloqueados (confirmado en un segundo run real) sin un espejo equivalente.
+    Como acá solo operamos spot, restringimos fetchMarkets a ese tipo -- así
+    ccxt nunca intenta pegarle a fapi/dapi."""
     exchange = getattr(ccxt, exchange_id)()
     if exchange_id == "binance":
         exchange.urls["api"]["public"] = "https://data-api.binance.vision/api/v3"
+        exchange.options["fetchMarkets"] = {"types": ["spot"], "loadAllOptions": False}
     return exchange
 
 
