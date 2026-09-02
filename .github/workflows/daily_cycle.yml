@@ -1,0 +1,33 @@
+name: Ciclo diario de paper trading
+
+on:
+  schedule:
+    - cron: "0 11 * * *"  # 08:00 hora Argentina (UTC-3)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  run-cycle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - run: python scripts/run_paper_cycle.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Guardar el estado actualizado
+        run: |
+          git config user.name "trading-agent-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add paper_trading/
+          git diff --staged --quiet || git commit -m "Ciclo diario: $(date -u +%Y-%m-%d)"
+          git push

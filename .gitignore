@@ -5,5 +5,5 @@ __pycache__/
 data/raw/
 data/processed/
 logs/
-paper_trading/
+paper_trading/dashboard.html
 .ipynb_checkpoints/
