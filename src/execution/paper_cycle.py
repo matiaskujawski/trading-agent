@@ -94,9 +94,16 @@ def run_daily_cycle(decision_fn=claude_decision, dry_run: bool = False) -> dict:
             events.append(f"STOP-LOSS: se cerró {symbol} con pérdida de ${-pnl:.2f}")
             del positions[symbol]
 
-    # 2) freno de portafolio (drawdown máximo) -- si se toca, se liquida todo
+    # 2) freno de portafolio (drawdown máximo) -- si se toca (ahora o ya venía
+    # activo de un ciclo anterior), se liquida todo lo que haya precio fresco.
+    # check_drawdown_breach() solo devuelve True la primera vez que detecta la
+    # ruptura (ver risk_manager.py) -- usar ese valor de retorno como gatillo
+    # de liquidación dejaba posiciones abiertas para siempre si su fetch de
+    # precio fallaba justo en el ciclo del freno: el freno nunca reintentaba
+    # liquidarlas en ciclos posteriores porque el evento ya no era "nuevo".
     worst_case_equity = cash + sum(positions[s]["qty"] * dfs[s]["low"].iloc[-1] for s in positions if s in dfs)
-    if risk.check_drawdown_breach(worst_case_equity):
+    risk.check_drawdown_breach(worst_case_equity)
+    if risk.halted:
         for symbol in list(positions.keys()):
             if symbol not in dfs:
                 continue
