@@ -22,20 +22,51 @@ def moving_average_crossover(df: pd.DataFrame, fast: int = 20, slow: int = 50) -
     return "hold"
 
 
+def _moving_average_gap_series(df: pd.DataFrame, fast: int, slow: int) -> pd.Series:
+    """Serie completa del gap % entre media rápida y lenta (no solo el último
+    valor) -- hace falta la serie entera para poder medir qué tan disperso es
+    normalmente ese gap para este activo en particular, no solo su valor
+    actual."""
+    closes = df["close"]
+    fast_ma = closes.rolling(fast).mean()
+    slow_ma = closes.rolling(slow).mean()
+    return (fast_ma - slow_ma) / slow_ma * 100
+
+
 def moving_average_gap_pct(df: pd.DataFrame, fast: int = 20, slow: int = 50) -> float | None:
-    """Distancia porcentual entre la media rápida y la lenta en el último dato
-    disponible -- cuanto más cerca de 0, más cerca está el activo de un cruce
-    (en cualquier dirección). No es una señal de trading, solo un indicador
-    de "qué tan cerca" para mostrar en el panel. None si no hay suficiente
-    historial todavía."""
+    """Distancia porcentual CRUDA entre la media rápida y la lenta en el
+    último dato disponible. Ojo: esto no es comparable entre activos de
+    volatilidad muy distinta -- un par forex de baja volatilidad va a tener
+    este % chico casi siempre, aunque no esté especialmente cerca de cruzar
+    en términos de su propio comportamiento habitual (ver
+    moving_average_gap_zscore, que sí es comparable entre activos). No es
+    una señal de trading, solo un dato informativo. None si no hay
+    suficiente historial todavía."""
     if len(df) < slow:
         return None
 
-    closes = df["close"].tail(slow)
-    fast_ma = closes.rolling(fast).mean().iloc[-1]
-    slow_ma = closes.rolling(slow).mean().iloc[-1]
+    gap = _moving_average_gap_series(df, fast, slow).iloc[-1]
+    return None if pd.isna(gap) else float(gap)
 
-    if pd.isna(fast_ma) or pd.isna(slow_ma) or slow_ma == 0:
+
+def moving_average_gap_zscore(df: pd.DataFrame, fast: int = 20, slow: int = 50, min_samples: int = 20) -> float | None:
+    """Qué tan cerca está el gap actual de un cruce, medido en desvíos
+    estándar del gap histórico de ESTE activo -- no en % crudo. Así un
+    activo de baja volatilidad (donde el % crudo siempre es chico) y uno de
+    alta volatilidad (donde el % crudo siempre es grande) quedan en la misma
+    escala real de comparación: cuánto se aleja el gap actual de lo que es
+    "normal" para ese activo en particular, no en términos absolutos.
+    None si no hay suficiente historial, o si el activo no tuvo dispersión
+    (precio constante)."""
+    if len(df) < slow:
         return None
 
-    return float((fast_ma - slow_ma) / slow_ma * 100)
+    gap_series = _moving_average_gap_series(df, fast, slow).dropna()
+    if len(gap_series) < min_samples:
+        return None
+
+    std = gap_series.std()
+    if pd.isna(std) or std == 0:
+        return None
+
+    return float(gap_series.iloc[-1] / std)

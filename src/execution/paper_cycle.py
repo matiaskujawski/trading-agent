@@ -12,7 +12,7 @@ import pandas as pd
 from src.backtest.engine import ATR_MULTIPLIER, ATR_PERIOD, COST_MODEL, STOP_DISTANCE_PCT_FALLBACK
 from src.backtest.indicators import average_true_range
 from src.backtest.portfolio_engine import CORRELATION_THRESHOLD, CORRELATION_WINDOW
-from src.backtest.strategy_baseline import moving_average_crossover, moving_average_gap_pct
+from src.backtest.strategy_baseline import moving_average_crossover, moving_average_gap_pct, moving_average_gap_zscore
 from src.config import CRYPTO_SYMBOLS, FOREX_PAIRS, RISK_PARAMS
 from src.data_pipeline.crypto import fetch_ohlcv
 from src.data_pipeline.forex import fetch_forex
@@ -209,6 +209,7 @@ def run_daily_cycle(decision_fn=claude_decision, dry_run: bool = False) -> dict:
                     "asset_class": assets[symbol],
                     "price": float(df["close"].iloc[-1]),
                     "gap_pct": moving_average_gap_pct(df),
+                    "gap_zscore": moving_average_gap_zscore(df),
                     "has_position": symbol in positions,
                 }
                 for symbol, df in dfs.items()

@@ -819,25 +819,27 @@
       return;
     }
 
-    note.textContent = `${assets.length} activo${assets.length === 1 ? "" : "s"} monitoreados -- ordenados por cercanía a un cruce de medias`;
+    note.textContent = `${assets.length} activo${assets.length === 1 ? "" : "s"} monitoreados -- ordenados por cercanía a un cruce, normalizada por la volatilidad propia de cada uno`;
 
     const rows = assets
       .slice()
       .sort((a, b) => {
-        const gapA = a[1].gap_pct;
-        const gapB = b[1].gap_pct;
-        if (gapA == null && gapB == null) return 0;
-        if (gapA == null) return 1;
-        if (gapB == null) return -1;
-        return Math.abs(gapA) - Math.abs(gapB);
+        const zA = a[1].gap_zscore;
+        const zB = b[1].gap_zscore;
+        if (zA == null && zB == null) return 0;
+        if (zA == null) return 1;
+        if (zB == null) return -1;
+        return Math.abs(zA) - Math.abs(zB);
       })
       .map(([symbol, a]) => {
         const priceDecimals = a.price < 10 ? 4 : 2;
+        const zDisplay = a.gap_zscore == null ? "—" : `${a.gap_zscore >= 0 ? "+" : ""}${a.gap_zscore.toFixed(2)}σ`;
+        const pctDisplay = a.gap_pct == null ? "" : fmtPct(a.gap_pct);
         return `<tr>
           <td>${symbol}</td>
           <td>${a.asset_class === "crypto" ? "Cripto" : "Forex"}</td>
           <td class="num">${fmtUSD(a.price, { decimals: priceDecimals })}</td>
-          <td class="num">${a.gap_pct == null ? "—" : fmtPct(a.gap_pct)}</td>
+          <td class="num">${zDisplay}${pctDisplay ? `<br><span style="font-size:0.72rem;color:var(--text-faint)">${pctDisplay} crudo</span>` : ""}</td>
           <td>${a.has_position ? '<span class="side-pill buy">posición abierta</span>' : "—"}</td>
         </tr>`;
       })
@@ -847,7 +849,7 @@
       <table class="trades">
         <thead><tr>
           <th>Activo</th><th>Clase</th>
-          <th class="num">Precio</th><th class="num">Distancia a cruce</th><th>Estado</th>
+          <th class="num">Precio</th><th class="num">Distancia a cruce (normalizada)</th><th>Estado</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
