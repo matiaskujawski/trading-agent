@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from src.config import CRYPTO_SYMBOLS, FOREX_PAIRS, RISK_PARAMS
 from src.execution.api_usage import MONTHLY_BUDGET_USD, monthly_spend
+from src.execution.market_snapshot import load_market_snapshot
 from src.execution.trade_log import ANALYST_NOTES_PATH, EQUITY_LOG_PATH, TRADES_LOG_PATH, read_jsonl
 
 # Argentina no usa horario de verano -- UTC-3 es fijo todo el año.
@@ -32,4 +33,5 @@ def build_dashboard_data() -> dict:
         "equity_daily": equity_daily,
         "trades": trades,
         "analyst_notes": analyst_notes,
+        "market_snapshot": load_market_snapshot(),
     }

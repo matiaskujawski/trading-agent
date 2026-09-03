@@ -20,3 +20,22 @@ def moving_average_crossover(df: pd.DataFrame, fast: int = 20, slow: int = 50) -
     if crossed_down:
         return "sell"
     return "hold"
+
+
+def moving_average_gap_pct(df: pd.DataFrame, fast: int = 20, slow: int = 50) -> float | None:
+    """Distancia porcentual entre la media rápida y la lenta en el último dato
+    disponible -- cuanto más cerca de 0, más cerca está el activo de un cruce
+    (en cualquier dirección). No es una señal de trading, solo un indicador
+    de "qué tan cerca" para mostrar en el panel. None si no hay suficiente
+    historial todavía."""
+    if len(df) < slow:
+        return None
+
+    closes = df["close"].tail(slow)
+    fast_ma = closes.rolling(fast).mean().iloc[-1]
+    slow_ma = closes.rolling(slow).mean().iloc[-1]
+
+    if pd.isna(fast_ma) or pd.isna(slow_ma) or slow_ma == 0:
+        return None
+
+    return float((fast_ma - slow_ma) / slow_ma * 100)

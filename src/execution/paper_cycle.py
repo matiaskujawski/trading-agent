@@ -12,12 +12,13 @@ import pandas as pd
 from src.backtest.engine import ATR_MULTIPLIER, ATR_PERIOD, COST_MODEL, STOP_DISTANCE_PCT_FALLBACK
 from src.backtest.indicators import average_true_range
 from src.backtest.portfolio_engine import CORRELATION_THRESHOLD, CORRELATION_WINDOW
-from src.backtest.strategy_baseline import moving_average_crossover
+from src.backtest.strategy_baseline import moving_average_crossover, moving_average_gap_pct
 from src.config import CRYPTO_SYMBOLS, FOREX_PAIRS, RISK_PARAMS
 from src.data_pipeline.crypto import fetch_ohlcv
 from src.data_pipeline.forex import fetch_forex
 from src.data_pipeline.sentiment import build_sentiment_context
 from src.execution.fetch_health import record_fetch_results
+from src.execution.market_snapshot import save_market_snapshot
 from src.execution.paper_state import load_state, save_state
 from src.execution.shock_watchdog import save_shock_reference
 from src.execution.trade_log import log_daily_equity, log_trade
@@ -202,5 +203,16 @@ def run_daily_cycle(decision_fn=claude_decision, dry_run: bool = False) -> dict:
         log_daily_equity({"day": today, "equity": equity, "cash": cash, "n_posiciones": len(positions), "halted": risk.halted})
         save_shock_reference({symbol: df["close"].iloc[-1] for symbol, df in dfs.items()})
         record_fetch_results(fetch_results)
+        save_market_snapshot(
+            {
+                symbol: {
+                    "asset_class": assets[symbol],
+                    "price": float(df["close"].iloc[-1]),
+                    "gap_pct": moving_average_gap_pct(df),
+                    "has_position": symbol in positions,
+                }
+                for symbol, df in dfs.items()
+            }
+        )
 
     return {"day": today, "equity": equity, "state": state, "events": events, "sentiment_context": sentiment_context}

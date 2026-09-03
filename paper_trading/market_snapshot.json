@@ -1,0 +1,107 @@
+{
+  "updated_at": "2026-09-03T00:03:29+00:00",
+  "assets": {
+    "BTC/USDT": {
+      "asset_class": "crypto",
+      "price": 77368.01,
+      "gap_pct": 9.03536167572069,
+      "has_position": false
+    },
+    "ETH/USDT": {
+      "asset_class": "crypto",
+      "price": 2394.37,
+      "gap_pct": 12.645466780880396,
+      "has_position": false
+    },
+    "LINK/USDT": {
+      "asset_class": "crypto",
+      "price": 11.117,
+      "gap_pct": 16.317638910364078,
+      "has_position": false
+    },
+    "UNI/USDT": {
+      "asset_class": "crypto",
+      "price": 5.855,
+      "gap_pct": 8.534146930051385,
+      "has_position": false
+    },
+    "CAKE/USDT": {
+      "asset_class": "crypto",
+      "price": 1.826,
+      "gap_pct": 10.971140632157573,
+      "has_position": false
+    },
+    "XRP/USDT": {
+      "asset_class": "crypto",
+      "price": 1.3543,
+      "gap_pct": 12.37073487321156,
+      "has_position": false
+    },
+    "SOL/USDT": {
+      "asset_class": "crypto",
+      "price": 100.41,
+      "gap_pct": 13.798480936699221,
+      "has_position": false
+    },
+    "ADA/USDT": {
+      "asset_class": "crypto",
+      "price": 0.2023,
+      "gap_pct": 7.608521115452553,
+      "has_position": false
+    },
+    "DOT/USDT": {
+      "asset_class": "crypto",
+      "price": 0.87,
+      "gap_pct": 2.8600588049473785,
+      "has_position": false
+    },
+    "AVAX/USDT": {
+      "asset_class": "crypto",
+      "price": 7.192,
+      "gap_pct": 5.769515671203984,
+      "has_position": false
+    },
+    "LTC/USDT": {
+      "asset_class": "crypto",
+      "price": 49.8,
+      "gap_pct": 3.943656570133115,
+      "has_position": false
+    },
+    "EURUSD": {
+      "asset_class": "forex",
+      "price": 1.1588828563690186,
+      "gap_pct": 0.8904697560400764,
+      "has_position": false
+    },
+    "GBPUSD": {
+      "asset_class": "forex",
+      "price": 1.348235845565796,
+      "gap_pct": 0.8135479325066777,
+      "has_position": false
+    },
+    "USDJPY": {
+      "asset_class": "forex",
+      "price": 158.8350067138672,
+      "gap_pct": -0.9813192703045395,
+      "has_position": false
+    },
+    "USDCHF": {
+      "asset_class": "forex",
+      "price": 0.8127999901771545,
+      "gap_pct": -0.15859666280925896,
+      "has_position": false
+    },
+    "AUDUSD": {
+      "asset_class": "forex",
+      "price": 0.7165377140045166,
+      "gap_pct": 1.3102959401991694,
+      "has_position": false
+    },
+    "USDCAD": {
+      "asset_class": "forex",
+      "price": 1.3839999437332153,
+      "gap_pct": -1.007757018294629,
+      "has_position": false
+    }
+  }
+}
