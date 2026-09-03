@@ -50,13 +50,24 @@ def save_shock_reference(prices: dict[str, float]) -> None:
     día) -- si el ciclo corre varias veces por día para reaccionar más
     rápido a las señales técnicas, eso NO debe correr también la vara de qué
     cuenta como "shock": tiene que seguir siendo relativo al cierre real del
-    día, no a "hace un rato"."""
+    día, no a "hace un rato".
+
+    Pero "una vez por día" no puede significar "solo si la primera corrida
+    del día tuvo éxito para todos los activos": si esa primera corrida falló
+    para algún símbolo (como pasó con el 451 de Binance) y no se completa acá,
+    ese símbolo se queda sin vigía de shocks por el resto del día entero, en
+    silencio. Por eso las corridas siguientes del mismo día completan los
+    símbolos que todavía faltan, sin pisar los que ya tienen referencia."""
     today = date.today().isoformat()
     existing = load_shock_reference()
     if existing.get("_date") == today:
-        return
-    payload = dict(prices)
-    payload["_date"] = today
+        missing = {symbol: price for symbol, price in prices.items() if symbol not in existing}
+        if not missing:
+            return
+        payload = {**existing, **missing}
+    else:
+        payload = dict(prices)
+        payload["_date"] = today
     REFERENCE_PATH.parent.mkdir(parents=True, exist_ok=True)
     REFERENCE_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
