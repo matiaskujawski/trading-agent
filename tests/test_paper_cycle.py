@@ -76,3 +76,30 @@ def test_freno_por_drawdown_liquida_posicion_cuyo_fetch_fallo_en_ciclos_posterio
     # que terminar de liquidarla en vez de dejarla abierta para siempre.
     assert result2["state"]["positions"] == {}
     assert store["state"]["positions"] == {}
+
+
+def test_equity_no_descarta_posicion_cuyo_fetch_fallo_este_ciclo(monkeypatch, stub_environment):
+    """worst_case_equity y equity sumaban el valor de una posición solo si
+    su símbolo tenía precio fresco este ciclo (`if s in dfs`), en vez de usar
+    last_known_price/entry_price como respaldo -- una posición con fetch
+    fallido simplemente desaparecía del cálculo. Eso podía activar el freno
+    de drawdown por una caída que no era real (solo un símbolo sin cotizar),
+    y dejaba equity_daily.jsonl con un valor subestimado ese día."""
+    store = stub_environment
+    store["state"]["cash"] = 3_000
+    store["state"]["peak_equity"] = 10_000  # freno se activa si worst_case_equity < 8_000
+    store["state"]["positions"] = {"A": {"qty": 10, "entry_price": 600, "opened_at": "2026-09-01"}}
+
+    def fake_fetch_recent(symbol, asset_class):
+        if symbol == "A":
+            raise RuntimeError("rate limited")
+        return make_df(low=50, close=50)  # B, sin posición abierta
+
+    monkeypatch.setattr(paper_cycle, "_fetch_recent", fake_fetch_recent)
+
+    result = paper_cycle.run_daily_cycle(decision_fn=lambda *_: pytest.fail("no debería consultarse al LLM"))
+
+    # Incluyendo A por su entry_price de respaldo: 3_000 + 10*600 = 9_000 >= 8_000 -> sin freno.
+    assert result["state"]["halted"] is False
+    assert result["equity"] == pytest.approx(9_000)
+    assert "A" in result["state"]["positions"]

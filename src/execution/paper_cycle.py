@@ -101,7 +101,10 @@ def run_daily_cycle(decision_fn=claude_decision, dry_run: bool = False) -> dict:
     # de liquidación dejaba posiciones abiertas para siempre si su fetch de
     # precio fallaba justo en el ciclo del freno: el freno nunca reintentaba
     # liquidarlas en ciclos posteriores porque el evento ya no era "nuevo".
-    worst_case_equity = cash + sum(positions[s]["qty"] * dfs[s]["low"].iloc[-1] for s in positions if s in dfs)
+    worst_case_equity = cash + sum(
+        positions[s]["qty"] * (dfs[s]["low"].iloc[-1] if s in dfs else positions[s].get("last_known_price", positions[s]["entry_price"]))
+        for s in positions
+    )
     risk.check_drawdown_breach(worst_case_equity)
     if risk.halted:
         for symbol in list(positions.keys()):
@@ -191,7 +194,10 @@ def run_daily_cycle(decision_fn=claude_decision, dry_run: bool = False) -> dict:
         if symbol in dfs:
             positions[symbol]["last_known_price"] = float(dfs[symbol]["close"].iloc[-1])
 
-    equity = cash + sum(positions[s]["qty"] * dfs[s]["close"].iloc[-1] for s in positions if s in dfs)
+    equity = cash + sum(
+        positions[s]["qty"] * (dfs[s]["close"].iloc[-1] if s in dfs else positions[s].get("last_known_price", positions[s]["entry_price"]))
+        for s in positions
+    )
     risk.update_peak(equity)
 
     state.update(
