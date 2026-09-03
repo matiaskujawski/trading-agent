@@ -1,0 +1,27 @@
+{
+  "EURUSD": {
+    "last_success": "2026-09-03T00:24:13+00:00",
+    "last_error": null,
+    "consecutive_failures": 0
+  },
+  "GBPUSD": {
+    "last_success": "2026-09-03T00:24:13+00:00",
+    "last_error": null,
+    "consecutive_failures": 0
+  },
+  "USDJPY": {
+    "last_success": "2026-09-03T00:24:13+00:00",
+    "last_error": null,
+    "consecutive_failures": 0
+  },
+  "USDCHF": {
+    "last_success": "2026-09-03T00:24:13+00:00",
+    "last_error": null,
+    "consecutive_failures": 0
+  },
+  "AUDUSD": {
+    "last_success": "2026-09-03T00:24:13+00:00",
+    "last_error": null,
+    "consecutive_failures": 0
+  }
+}
