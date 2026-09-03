@@ -1,86 +1,86 @@
 {
   "EURUSD": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "GBPUSD": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "USDJPY": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "USDCHF": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "AUDUSD": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "BTC/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "ETH/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "LINK/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "UNI/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "CAKE/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "XRP/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "SOL/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "ADA/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "DOT/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "AVAX/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "LTC/USDT": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   },
   "USDCAD": {
-    "last_success": "2026-09-03T16:23:11+00:00",
+    "last_success": "2026-09-03T18:17:38+00:00",
     "last_error": null,
     "consecutive_failures": 0
   }
