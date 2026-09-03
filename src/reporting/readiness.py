@@ -24,6 +24,13 @@ CLOSING_SIDES = {
     "risk_halt_exit_reactivo",
 }
 
+# Coincide con las distintas formas en que se etiquetó una nota de bug hasta
+# ahora ("Correccion tecnica", "Bug critico corregido", "Bug de referencia de
+# shocks corregido", ...). Antes solo se buscaba "correccion" y se perdía en
+# silencio la mayoría de las notas de bugs reales, lo que inflaba "días sin
+# bugs" -- justo la métrica que decide si se cumplió un mes entero sin ninguno.
+BUG_TAG_KEYWORDS = ("correcc", "corregi", "bug")
+
 
 def compute_readiness_snapshot() -> dict:
     trades = read_jsonl(TRADES_LOG_PATH)
@@ -32,7 +39,7 @@ def compute_readiness_snapshot() -> dict:
     shock_events = read_jsonl(SHOCK_EVENTS_PATH)
 
     notes = read_jsonl(ANALYST_NOTES_PATH)
-    bug_notes = [n for n in notes if "correccion" in n.get("tag", "").lower()]
+    bug_notes = [n for n in notes if any(kw in n.get("tag", "").lower() for kw in BUG_TAG_KEYWORDS)]
     last_bug_day = bug_notes[-1]["day"] if bug_notes else None
     days_since_bug = (date.today() - date.fromisoformat(last_bug_day)).days if last_bug_day else None
 
