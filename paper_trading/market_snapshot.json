@@ -1,81 +1,81 @@
 {
-  "updated_at": "2026-09-05T20:21:03+00:00",
+  "updated_at": "2026-09-05T22:19:56+00:00",
   "assets": {
     "BTC/USDT": {
       "asset_class": "crypto",
-      "price": 79762.62,
-      "gap_pct": 10.614157163211656,
-      "gap_zscore": 1.8931046825182631,
+      "price": 79869.08,
+      "gap_pct": 10.618450022022492,
+      "gap_zscore": 1.8938380700785977,
       "has_position": false
     },
     "ETH/USDT": {
       "asset_class": "crypto",
-      "price": 2478.05,
-      "gap_pct": 14.282094021839622,
-      "gap_zscore": 1.7509760368583982,
+      "price": 2486.24,
+      "gap_pct": 14.292724709918575,
+      "gap_zscore": 1.7522358609138649,
       "has_position": false
     },
     "LINK/USDT": {
       "asset_class": "crypto",
-      "price": 11.998,
-      "gap_pct": 17.29690417444654,
-      "gap_zscore": 2.2473514814336326,
+      "price": 12.078,
+      "gap_pct": 17.31902356902356,
+      "gap_zscore": 2.250080738614767,
       "has_position": false
     },
     "UNI/USDT": {
       "asset_class": "crypto",
-      "price": 7.152,
-      "gap_pct": 13.801334420709763,
-      "gap_zscore": 1.5559883262785772,
+      "price": 7.126,
+      "gap_pct": 13.784443819072461,
+      "gap_zscore": 1.5541224306386627,
       "has_position": false
     },
     "CAKE/USDT": {
       "asset_class": "crypto",
-      "price": 2.249,
-      "gap_pct": 13.613061977751606,
-      "gap_zscore": 2.966033838751726,
+      "price": 2.265,
+      "gap_pct": 13.641023012659526,
+      "gap_zscore": 2.971604052718163,
       "has_position": false
     },
     "XRP/USDT": {
       "asset_class": "crypto",
-      "price": 1.4158,
-      "gap_pct": 14.84787496312171,
-      "gap_zscore": 2.6606830949227334,
+      "price": 1.4177,
+      "gap_pct": 14.852228817711849,
+      "gap_zscore": 2.661397720642116,
       "has_position": false
     },
     "SOL/USDT": {
       "asset_class": "crypto",
-      "price": 103.36,
-      "gap_pct": 15.722084236997386,
-      "gap_zscore": 2.267929586276198,
+      "price": 103.64,
+      "gap_pct": 15.731054144648143,
+      "gap_zscore": 2.26915390521346,
       "has_position": false
     },
     "ADA/USDT": {
       "asset_class": "crypto",
-      "price": 0.2199,
-      "gap_pct": 8.821416118090847,
-      "gap_zscore": 0.8411616691887753,
+      "price": 0.22,
+      "gap_pct": 8.822907861369396,
+      "gap_zscore": 0.8413024488531663,
       "has_position": false
     },
     "DOT/USDT": {
       "asset_class": "crypto",
-      "price": 0.916,
-      "gap_pct": 4.445251937984504,
-      "gap_zscore": 0.8021447214480575,
+      "price": 0.923,
+      "gap_pct": 4.469930002179862,
+      "gap_zscore": 0.8065277524734203,
       "has_position": false
     },
     "AVAX/USDT": {
       "asset_class": "crypto",
-      "price": 7.593,
-      "gap_pct": 7.029311243188824,
-      "gap_zscore": 0.9735680156301039,
+      "price": 7.616,
+      "gap_pct": 7.038990704164001,
+      "gap_zscore": 0.9748873172894761,
       "has_position": false
     },
     "LTC/USDT": {
       "asset_class": "crypto",
-      "price": 54.27,
-      "gap_pct": 5.163775922548649,
-      "gap_zscore": 0.9403149646659709,
+      "price": 54.75,
+      "gap_pct": 5.19318715441858,
+      "gap_zscore": 0.9455992642596616,
       "has_position": false
     },
     "EURUSD": {
