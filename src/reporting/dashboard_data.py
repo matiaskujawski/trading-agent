@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from src.config import CRYPTO_SYMBOLS, FOREX_PAIRS, RISK_PARAMS
 from src.execution.api_usage import MONTHLY_BUDGET_USD, monthly_spend
 from src.execution.market_snapshot import load_market_snapshot
+from src.execution.system_status import load_system_status
 from src.execution.trade_log import ANALYST_NOTES_PATH, EQUITY_LOG_PATH, TRADES_LOG_PATH, read_jsonl
 
 # Argentina no usa horario de verano -- UTC-3 es fijo todo el año.
@@ -16,6 +17,7 @@ def build_dashboard_data() -> dict:
     equity_daily = read_jsonl(EQUITY_LOG_PATH)
     trades = read_jsonl(TRADES_LOG_PATH)
     analyst_notes = read_jsonl(ANALYST_NOTES_PATH)
+    system_status = load_system_status()
 
     return {
         "meta": {
@@ -27,6 +29,8 @@ def build_dashboard_data() -> dict:
             "universe_forex": FOREX_PAIRS,
             "last_updated": datetime.now(ARGENTINA_TZ).strftime("%Y-%m-%d %H:%M ART"),
             "is_live": len(equity_daily) > 0,
+            "is_paused": system_status["paused"],
+            "paused_note": system_status["note"],
             "api_spend_month_usd": round(monthly_spend(), 4),
             "api_budget_month_usd": MONTHLY_BUDGET_USD,
         },

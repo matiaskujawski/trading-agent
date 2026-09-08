@@ -1,0 +1,5 @@
+{
+  "paused": true,
+  "paused_at": "2026-09-08T19:54:50+00:00",
+  "note": "Pausado a pedido del usuario el 2026-09-08 para no consumir tokens mientras no hay actividad. El ciclo de trading, el vigia de shocks y la actualizacion automatica del panel estan frenados hasta que el usuario pida retomar."
+}

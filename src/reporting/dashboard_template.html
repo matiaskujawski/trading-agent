@@ -146,7 +146,7 @@
   }
 
   .status-chip.live .dot { background: var(--gain); }
-  .status-chip.pending .dot { background: var(--warn); }
+  .status-chip.pending .dot, .status-chip.paused .dot { background: var(--warn); }
 
   /* ---------- hero ---------- */
 
@@ -501,6 +501,11 @@
     <span class="status-chip" id="status-chip"><span class="dot"></span><span id="status-text">--</span></span>
   </header>
 
+  <div class="panel" id="paused-banner" hidden style="padding: 0.9rem 1.3rem; margin-bottom: 1.25rem; border-left: 3px solid var(--warn); display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;">
+    <span style="font-weight: 600; color: var(--warn);">⏸ Sistema pausado</span>
+    <span id="paused-note" style="color: var(--text-muted); font-size: 0.88rem;"></span>
+  </div>
+
   <section class="hero">
     <div class="panel hero-equity">
       <span class="eyebrow">Capital actual (simulado)</span>
@@ -622,6 +627,8 @@
       universe_forex: ["EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD"],
       last_updated: null,
       is_live: false,
+      is_paused: false,
+      paused_note: null,
       api_spend_month_usd: 0,
       api_budget_month_usd: 2
     },
@@ -652,9 +659,19 @@
       ? "actualizado " + meta.last_updated
       : "todavía sin corridas";
 
+    const pausedBanner = document.getElementById("paused-banner");
+    pausedBanner.hidden = !meta.is_paused;
+    if (meta.is_paused) {
+      document.getElementById("paused-note").textContent =
+        meta.paused_note || "El ciclo de trading y la actualización automática del panel están frenados.";
+    }
+
     const chip = document.getElementById("status-chip");
     const statusText = document.getElementById("status-text");
-    if (meta.is_live) {
+    if (meta.is_paused) {
+      chip.className = "status-chip paused";
+      statusText.textContent = "pausado";
+    } else if (meta.is_live) {
       chip.className = "status-chip live";
       statusText.textContent = "corriendo";
     } else {
